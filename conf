@@ -1,2 +1,2 @@
-geoip-url="https://free.freeipapi.com/api/json/"
+geoip-url=https://free.freeipapi.com/api/json/
 geoip-fields=latitude,longitude,countryName,countryCode,cityName

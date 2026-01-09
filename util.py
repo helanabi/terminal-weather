@@ -1,63 +1,44 @@
 #!/usr/bin/env python
 
 import re
+import requests
 import sys
 
-def parse_values(values):
-    """Return a tuple from a string of comma separated values
-    Values may be double-quoted
-    """
-    if len(values) == 0:
-        return ('',)
+CONF_SPEC = {
+    "cumulative": ("geoip-url", "geoip-fields")
+}
 
-    if values[0] == '"':
-        chunks = values[1:].split(sep='"', maxsplit=1)
-        if len(chunks) == 1:
-            raise ValueError("unmatched double quote")
-        else:
-            next_value, rest = chunks
-            if len(rest) == 0:
-                return (next_value,)
-            elif rest[0] == ',':
-                return (next_value,) + parse_values(rest[1:])
-            else:
-                raise ValueError(
-                    "unexpected quote before:"
-                    + rest
-                    + "\nNote: add a comma (,) to separate quoted values."
-                )
-    else:
-        chunks = values.split(sep=',', maxsplit=1)
-        if len(chunks) == 1:
-            return (chunks[0],)
-        else:
-            next_value, rest = chunks
-            return (next_value,) + parse_values(rest)
+def store_line(spec, conf, line):
+    key, value = (s.strip() for s in line.split(sep="=", maxsplit=1))
+    cumulative = False
 
-def update_conf(root, key, value):
-    if root.get(key) == None:
-        root[key] = [value]
-    elif isinstance(root[key], list):
-        root[key].append(value)
-    else:
-        raise ValueError(f"key '{key}' stores a non-list value:", value)
+    category = tuple(category for category in spec
+                if key in spec[category])
 
-def store_line(conf, line):
-    key, value = line.split(sep="=", maxsplit=1)
-    key = key.split('-')
-    value = parse_values(value)
-    pointer = conf
-    for i in range(len(key)):
-        if i+1 == len(key):
-            update_conf(pointer, key[i], value)
-        else:
-            next_pointer = pointer.get(key[i])
-            if not isinstance(next_pointer, dict):
-                next_pointer = {}
-                pointer[key[i]] = next_pointer
-            pointer = next_pointer
+    if not category:
+        print("Error: unrecognized configuration variable:",
+              key,
+              file=sys.stderr)
+        sys.exit(2)
 
-def parse_conf(path):
+    if category[0] == "cumulative":
+        cumulative = True
+
+    old_value = conf.get(key)
+    if old_value == None:
+        conf[key] = [value] if cumulative else value
+    elif isinstance(old_value, list) and cumulative:
+        old_value.append(value)
+    elif not isinstance(old_value, list) and cumulative:
+        raise ValueError("cumulative variable stores a non-list value:", key)
+    elif not cumulative:
+        print("Error: multiple values were assigned to non-cumulative "
+              "configuration variable:",
+              key,
+              file=sys.stderr)
+        sys.exit(2)
+
+def parse_conf(path, conf_spec):
     conf = {}
     try:
         with open(path, encoding="utf-8") as f:
@@ -69,21 +50,31 @@ def parse_conf(path):
                     print("Error: invalid configuration entry:" + entry,
                           file=sys.stderr)
                     sys.exit(2)
-                store_line(conf, sanitize_conf(line))
+                store_line(conf_spec, conf, line)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
 
     return lambda name: conf.get(name)
     
-def get_location(geoip_services):
+def get_location(conf):
     template = ("lat", "lon", "country_name", "country_code", "city")
-    for i in geoip_services["url"]:
-        response = requests.get(geoip_services["url"][i])
+    urls = conf("geoip-url")
+    fields = conf("geoip-fields")
+
+    if not urls:
+        return
+
+    for i in range(len(urls)):
+        current_fields = tuple((f.strip() for f in fields[i].split(',')))
+        if len(current_fields) != len(template):
+            raise ValueError("invalid number of fields for geoip-url:",
+                             urls[i])
+        
+        response = requests.get(urls[i])
         if response.ok:
             json = response.json()
-            fields = geoip_services["fields"][i]
             return dict(((key, json[field])
-                         for key,field in zip(template,fields)))
+                         for key,field in zip(template,current_fields)))
         else:
             response.raise_for_status()

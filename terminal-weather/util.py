@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import re
 import requests
 import sys
@@ -57,6 +55,23 @@ def parse_conf(path, conf_spec):
 
     return lambda name: conf.get(name)
     
+def resolve_cf(args):
+    def mkfile(*name_parts):
+        if not all(name_parts):
+            return False
+        name = os.path.join(*name_parts)
+        return os.path.isfile(name) and name
+    
+    for cf in (
+            args.conf,
+            os.getenv("TERMINAL_WEATHER_CF"),
+            mkfile(os.getenv("XDG_CONFIG_HOME"), "terminal-weather", "conf"),
+            mkfile(os.getenv("HOME"), ".config", "terminal-weather", "conf"),
+            mkfile(os.getenv("HOME"), ".terminal-weather")
+    ):
+        if cf:
+            return cf
+
 def get_location(conf):
     template = ("lat", "lon", "country_name", "country_code", "city")
     urls = conf("geoip-url")

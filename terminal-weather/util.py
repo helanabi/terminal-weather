@@ -17,7 +17,7 @@ def store_line(spec, conf, line):
         print("Error: unrecognized configuration variable:",
               key,
               file=sys.stderr)
-        sys.exit(2)
+        sys.exit(3)
 
     if category[0] == "cumulative":
         cumulative = True
@@ -34,7 +34,7 @@ def store_line(spec, conf, line):
               "configuration variable:",
               key,
               file=sys.stderr)
-        sys.exit(2)
+        sys.exit(3)
 
 def parse_conf(path, conf_spec):
     conf = {}
@@ -47,7 +47,7 @@ def parse_conf(path, conf_spec):
                 if not re.search('^[a-z]+(-[a-z]+)*=', line):
                     print("Error: invalid configuration entry:" + entry,
                           file=sys.stderr)
-                    sys.exit(2)
+                    sys.exit(3)
                 store_line(conf_spec, conf, line)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)

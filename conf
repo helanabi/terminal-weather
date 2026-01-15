@@ -1,2 +1,3 @@
 geoip-url=https://free.freeipapi.com/api/json/
 geoip-fields=latitude,longitude,countryName,countryCode,cityName
+key=4f2cd791a2e8e52c5e7d01e279600d16

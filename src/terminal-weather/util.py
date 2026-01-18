@@ -1,9 +1,25 @@
+"""Configuration management and other utility functions.
+
+Exported objects:
+  - init_conf(args): initialize config and make a lookup function
+  - get_location(conf): get user location data using geoip services
+"""
+
+import os
 import re
 import requests
 import sys
 
 CONF_SPEC = {
-    "cumulative": ("geoip-url", "geoip-fields")
+    "cumulative": ("geoip-url", "geoip-fields", "key"),
+    "singleton": ("location", "geocoordinates")
+}
+
+DEFAULTS = {
+    "when": "today",
+    "color": "yes",
+    "fields": "",
+    "units": "metric"
 }
 
 def store_line(spec, conf, line):
@@ -72,6 +88,39 @@ def resolve_cf(args):
         if cf:
             return cf
 
+def init_conf(args):
+    """Make a function to lookup values from args and config.
+
+    The returned function takes the name of a variable and returns its value
+    from 'args', configuration file or default values, otherwise None.
+    Variables of type 'cumulative' must be returned inside an iterable.
+
+    Positional Argument:
+    args -- an object with command-line args as attributes
+    """
+    pass # todo
+    # conf_file = util.resolve_cf(args)
+    # if not conf_file:
+    #     print("Error: unable to locate configuration file", file=sys.stderr)
+    #     sys.exit(3)
+
+    # conf = util.parse_conf(conf_file, CONF_SPEC)
+
+    # if args.key:
+    #     api_keys = [args.key]
+    # elif conf("key"):
+    #     api_keys = conf("key")
+    # else:
+    #     print("Error: unable to find an API key", file=sys.stderr)
+    #     sys.exit(9)
+
+    # if args.location:
+    #     location = args.location
+    # elif conf("location"):
+    #     location = conf("location")
+    # else:
+    #     pass
+        
 def get_location(conf):
     template = ("lat", "lon", "country_name", "country_code", "city")
     urls = conf("geoip-url")
@@ -93,3 +142,29 @@ def get_location(conf):
                          for key,field in zip(template,current_fields)))
         else:
             response.raise_for_status()
+
+def guess_location(lookup):
+    """Try to find user location coordinates.
+
+    If succesfull, return a tuple of coordinates (latitude, longitude),
+    otherwise return None.
+
+    Positional argument:
+    lookup -- a function that can lookup configuration entries
+    """
+    pass # todo
+    # try:
+    #     location = util.get_location(get_value)
+    #     if location:
+    #         print(f"It appears that you are in {location.city},",
+    #               location.country_name)
+            
+    #         if prompt("Is this your correct location? (yes/no):") == "yes":
+    #             coords = (location.lat, location.lon)
+    #             if prompt("Would you like to save this location for future"
+    #                       " runs? (yes/no):") == "yes":
+    #             else:
+    #                 print("Please run the program with the -l/--location "
+    #                       "option to specify a location.\n"
+    #                       "Note: you may specify a default location in "
+    #                       "your configuration file.")

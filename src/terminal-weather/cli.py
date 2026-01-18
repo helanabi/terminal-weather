@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-
 import argparse
 import sys
-import util
+from . import util
 
 VERSION = "Terminal-weather 0.1.0"
 COPYRIGHT = """Copyright (C) 2026 Hassan El anabi
@@ -54,7 +52,8 @@ def prompt(question):
         answer = input("Please answer with 'yes' or 'no':").lower()
     return answer
 
-def main(args):
+def main():
+    args = parse_args()
     if args.version:
         print(VERSION)
         print(COPYRIGHT)
@@ -83,8 +82,5 @@ def main(args):
 
     if not (coords or location):
         print("Error: one of 'geocoordinates' or 'location' must be specified"
-              " to get corresponding weather data", file=sys.stderr)
+              " to get the corresponding weather data", file=sys.stderr)
         sys.exit(2)
-
-if __name__ == "__main__":
-    main(parse_args())

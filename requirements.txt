@@ -2,6 +2,7 @@ certifi==2025.11.12
 charset-normalizer==3.4.4
 idna==3.11
 iniconfig==2.3.0
+owmlib @ git+https://github.com/helanabi/owmlib.git@535197704d887a45bf76974674bde22bc263c1f3
 packaging==25.0
 pluggy==1.6.0
 Pygments==2.19.2

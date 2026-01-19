@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """Configuration management and other utility functions.
 
 Exported objects:

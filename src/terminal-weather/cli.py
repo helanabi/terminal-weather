@@ -78,9 +78,9 @@ def main():
         location = args.location
     else:
         coords = util.guess_location(get_value, debug=get_value("debug"))
-        # if prompt("Would you like to save this location for future"
-        #           " runs? (yes/no):") == "yes":
-        #     save_location(location)
+        if util.prompt("Would you like to save this location for future"
+                  " runs? (yes/no):") == "yes":
+            util.write_conf("geocoordinates", ','.join(map(str, coords)))
 
     if not (coords or location):
         util.error("one of 'geocoordinates' or 'location' must be specified"

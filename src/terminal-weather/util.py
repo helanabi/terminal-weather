@@ -12,6 +12,7 @@ import re
 import requests
 import sys
 
+CONF_FILE = None # automatically set by init_conf()
 CONF_SPEC = {
     "cumulative": ("geoip-url", "geoip-fields", "key"),
     "singleton": (
@@ -112,6 +113,8 @@ def init_conf(args):
     if not conf_file:
         error("unable to locate configuration file", exit_code=3)
 
+    global CONF_FILE
+    CONF_FILE = conf_file
     conf = parse_conf(conf_file, CONF_SPEC)
 
     def lookup(var):
@@ -131,6 +134,17 @@ def init_conf(args):
         return DEFAULTS.get(var)
 
     return lookup
+
+def write_conf(name, value):
+    print("The following configuration file will be updated:\n" + CONF_FILE)
+    if prompt(f"Do you agree? (yes/no):") != "yes":
+        return
+    
+    try:
+        with open(CONF_FILE, mode='a') as cf:
+            cf.write(f"\n{name}={value}\n")
+    except Exception as e:
+        error(str(e), exit_code=1)
             
 def get_location(conf):
     template = ("lat", "lon", "country_name", "country_code", "city")
@@ -155,7 +169,7 @@ def get_location(conf):
             response.raise_for_status()
             
 def prompt(question):
-    answer = input(question).lower()
+    answer = input(f"{question} ").lower()
     while answer not in ("yes", "no"):
         answer = input("Please answer with 'yes' or 'no':").lower()
     return answer

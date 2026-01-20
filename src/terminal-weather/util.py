@@ -14,13 +14,20 @@ import sys
 
 CONF_SPEC = {
     "cumulative": ("geoip-url", "geoip-fields", "key"),
-    "singleton": ("location", "geocoordinates")
+    "singleton": (
+        "location",
+        "geocoordinates",
+        "when",
+        "color",
+        "fields",
+        "units"
+    )
 }
 
 DEFAULTS = {
-    "when": "today",
+    "when": "forecast",
     "color": "yes",
-    "fields": "",
+    "fields": "desc,temp,rain,wind_speed",
     "units": "metric"
 }
 
@@ -91,7 +98,7 @@ def resolve_cf(args):
             return cf
 
 def init_conf(args):
-    """Make a function to lookup values from args and config.
+    """Make a function to lookup values from args, config and defaults.
 
     The returned function takes the name of a variable and returns its value
     from 'args', configuration file or default values, otherwise None.
@@ -100,29 +107,31 @@ def init_conf(args):
     Positional Argument:
     args -- an object with command-line args as attributes
     """
-    pass # todo
-    # conf_file = util.resolve_cf(args)
-    # if not conf_file:
-    #     print("Error: unable to locate configuration file", file=sys.stderr)
-    #     sys.exit(3)
+    conf_file = resolve_cf(args)
+    if not conf_file:
+        error("unable to locate configuration file", exit_code=3)
 
-    # conf = util.parse_conf(conf_file, CONF_SPEC)
+    conf = parse_conf(conf_file, CONF_SPEC)
 
-    # if args.key:
-    #     api_keys = [args.key]
-    # elif conf("key"):
-    #     api_keys = conf("key")
-    # else:
-    #     print("Error: unable to find an API key", file=sys.stderr)
-    #     sys.exit(9)
-
-    # if args.location:
-    #     location = args.location
-    # elif conf("location"):
-    #     location = conf("location")
-    # else:
-    #     pass
+    def lookup(var):
+        try:
+            value = getattr(args, var)
+        except AttributeError:
+            pass
         
+        if value:
+            if var in CONF_SPEC["cumulative"]:
+                value = tuple(value)
+            return value
+
+        value = conf(var)
+        if value:
+            return value
+
+        return DEFAULTS.get(var)
+
+    return lookup
+            
 def get_location(conf):
     template = ("lat", "lon", "country_name", "country_code", "city")
     urls = conf("geoip-url")
@@ -170,3 +179,22 @@ def guess_location(lookup):
     #                       "option to specify a location.\n"
     #                       "Note: you may specify a default location in "
     #                       "your configuration file.")
+
+def separate(csv):
+    """Separate comma-separated values in a string.
+
+    Return a tuple of Values stripped from whitespace characters
+    before and after them.
+    
+    csv -- a string of comma-separated values
+    """
+    return tuple(value.strip() for value in csv.split(','))
+
+def error(msg, exit_code=2):
+    """Exit with an error message.
+
+    print the provided error message to stderr and exit with the given
+    status code.
+    """
+    print("Error:", msg, file=sys.stderr)
+    sys.exit(exit_code)

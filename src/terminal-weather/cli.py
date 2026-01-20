@@ -140,9 +140,9 @@ def main():
                        + ' '.join(set(fields) - set(owm.FIELDS)))
 
     delim = '\n'
-    sep = ": "
+    sep = "\t"
 
     print(delim.join(
-        sep.join((field, str(owm.get_field(weather_data, field)))) \
+        sep.join((field.ljust(10), str(owm.get_field(weather_data, field)))) \
         for field in fields
     ))

@@ -8,6 +8,8 @@ Get current weather and forecasts for upcoming days
 
 - City detection by IP address
 
+`todo`
+
 ## Requirements
 
 - Python 3.9+
@@ -20,29 +22,36 @@ Get current weather and forecasts for upcoming days
 
 ```
 usage: weather [-h] [-c CONF] [-C {yes,no}] [-f FIELDS] [-j] [-k KEY]
-               [-l LOCATION] [-u {metric,imperial,standard}] [-v]
-               [{now,today,tomorrow,forecast}]
+               [-u {metric,imperial,standard}] [-v] [-g GEOCOORDINATES |
+               -l LOCATION]
+               [{now,forecast}]
+
+Get current weather and forecasts for upcoming days
 
 positional arguments:
-  {now,today,tomorrow,forecast}
-                        show weather data for the specified time period
-			(default: today)
+  {now,forecast}        show weather data for the specified time period
+                        (default: forecast)
 
 options:
   -h, --help            show this help message and exit
   -c, --conf CONF       configuration file
   -C, --color {yes,no}  enable colored output (default: yes). This option is
                         ignored when -j/--json is used
-  -f, --fields FIELDS   specify a comma-separated list of fields to show,
-                        or 'all' to show all fields. Available fields are:
-			feels_like, uvi, wind, humidity, pressure, daylight
+  -f, --fields FIELDS   specify a comma-separated list of fields to show, or
+                        'all' to show all fields. Available fields are: desc,
+                        temp, feels_like, temp_min, temp_max, pressure,
+                        humidity, sea_level, grnd_level, visibility,
+                        wind_speed, wind_deg, wind_gust, rain, clouds,
+                        sunrise, sunset.
   -j, --json            show results in raw json format
   -k, --key KEY         OpenWeatherMap API key
-  -l, --location LOCATION
-                        must be in the format: city[,country]
   -u, --units {metric,imperial,standard}
                         (default: metric)
   -v, --version         show software version and copyright notice
+  -g, --geocoordinates GEOCOORDINATES
+                        geocoordintes of the form: latitude,longitude
+  -l, --location LOCATION
+                        a location of the format: city[,country]
 ```
 
 ## Examples
@@ -50,6 +59,9 @@ options:
 `To do`
 
 ## Configuration
+
+> Note: Command line arguments always take precendence over configuration
+file settings.
 
 Configuration file resolution order:
 
@@ -64,20 +76,21 @@ Configuration file resolution order:
 * `1`: filesystem error
 * `2`: bad usage
 * `3`: bad configuration
+* `9`: unknown error
 
 ## Future Improvements
 
-- Show weather icon in terminals that support it
-- Add caching functionality for offline usage
+- Custom output delimiter and separator
+- Custom field labels
+- User defined colors
+- Weather icon in terminals that support it
+- Caching functionality for offline usage
 
 ## Limitations
 
 `To do`
 
-## Copyright
+## License
 
-Copyright (C) 2026 Hassan El anabi
-Terminal-weather comes with ABSOLUTELY NO WARRANTY.
-You may redistribute copies of Terminal-weather
-under the terms of the GNU General Public License.
-For more information about these matters, see the file named COPYING.
+This project is licensed under the GNU General Public License v3.0 or later.
+See the COPYING file for details.

@@ -16,14 +16,14 @@ Get current weather and forecasts for upcoming days
 
 ## Installation
 
-`To do`
+`todo`
 
 ## Usage
 
 ```
-usage: weather [-h] [-c CONF] [-C {yes,no}] [-f FIELDS] [-j] [-k KEY]
-               [-u {metric,imperial,standard}] [-v] [-g GEOCOORDINATES |
-               -l LOCATION]
+usage: weather [-h] [-c CONF] [-C {yes,no}] [-d] [-f FIELDS] [-j] [-k KEY]
+               [-u {metric,imperial,standard}] [-g GEOCOORDINATES |
+               -l LOCATION] [-v]
                [{now,forecast}]
 
 Get current weather and forecasts for upcoming days
@@ -37,6 +37,7 @@ options:
   -c, --conf CONF       configuration file
   -C, --color {yes,no}  enable colored output (default: yes). This option is
                         ignored when -j/--json is used
+  -d, --debug           enable debugging messages
   -f, --fields FIELDS   specify a comma-separated list of fields to show, or
                         'all' to show all fields. Available fields are: desc,
                         temp, feels_like, temp_min, temp_max, pressure,
@@ -47,16 +48,16 @@ options:
   -k, --key KEY         OpenWeatherMap API key
   -u, --units {metric,imperial,standard}
                         (default: metric)
-  -v, --version         show software version and copyright notice
   -g, --geocoordinates GEOCOORDINATES
                         geocoordintes of the form: latitude,longitude
   -l, --location LOCATION
                         a location of the format: city[,country]
+  -v, --version         show software version and copyright notice
 ```
 
 ## Examples
 
-`To do`
+`todo`
 
 ## Configuration
 
@@ -78,6 +79,10 @@ Configuration file resolution order:
 * `3`: bad configuration
 * `9`: unknown error
 
+## Design notes
+
+`todo`
+
 ## Future Improvements
 
 - Custom output delimiter and separator
@@ -88,7 +93,7 @@ Configuration file resolution order:
 
 ## Limitations
 
-`To do`
+`todo`
 
 ## License
 

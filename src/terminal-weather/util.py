@@ -20,7 +20,8 @@ CONF_SPEC = {
         "when",
         "color",
         "fields",
-        "units"
+        "units",
+        "debug"
     )
 }
 
@@ -116,13 +117,12 @@ def init_conf(args):
     def lookup(var):
         try:
             value = getattr(args, var)
-        except AttributeError:
+            if value != None:
+                if var in CONF_SPEC["cumulative"]:
+                    value = (value,)
+                return value
+        except AttributeError as e:
             pass
-        
-        if value:
-            if var in CONF_SPEC["cumulative"]:
-                value = tuple(value)
-            return value
 
         value = conf(var)
         if value:
@@ -153,32 +153,34 @@ def get_location(conf):
                          for key,field in zip(template,current_fields)))
         else:
             response.raise_for_status()
+            
+def prompt(question):
+    answer = input(question).lower()
+    while answer not in ("yes", "no"):
+        answer = input("Please answer with 'yes' or 'no':").lower()
+    return answer
 
-def guess_location(lookup):
-    """Try to find user location coordinates.
+def guess_location(lookup, debug=False):
+    """Try to find user's location coordinates.
 
     If succesfull, return a tuple of coordinates (latitude, longitude),
     otherwise return None.
 
     Positional argument:
     lookup -- a function that can lookup configuration entries
+    debug -- enable debugging messages
     """
-    pass # todo
-    # try:
-    #     location = util.get_location(get_value)
-    #     if location:
-    #         print(f"It appears that you are in {location.city},",
-    #               location.country_name)
+    try:
+        location = get_location(lookup)
+        if location:
+            print(f"It appears that you are in {location["city"]},",
+                  location["country_name"])
             
-    #         if prompt("Is this your correct location? (yes/no):") == "yes":
-    #             coords = (location.lat, location.lon)
-    #             if prompt("Would you like to save this location for future"
-    #                       " runs? (yes/no):") == "yes":
-    #             else:
-    #                 print("Please run the program with the -l/--location "
-    #                       "option to specify a location.\n"
-    #                       "Note: you may specify a default location in "
-    #                       "your configuration file.")
+            if prompt("Is this your correct location? (yes/no):") == "yes":
+                return (location["lat"], location["lon"])
+    except Exception as e:
+        if debug:
+            print("guess_location:", e, file=sys.stderr)
 
 def separate(csv):
     """Separate comma-separated values in a string.

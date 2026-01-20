@@ -27,6 +27,8 @@ def parse_args():
     parser.add_argument("-C", "--color", choices=["yes", "no"],
                         help="enable colored output (default: yes). "
                         "This option is ignored when -j/--json is used")
+    parser.add_argument("-d", "--debug", action="store_true",
+                        help="enable debugging messages")
     parser.add_argument("-f", "--fields", help="specify a comma-separated list"
                         " of fields to show, or 'all' to show all fields. "
                         "Available fields are: desc, temp, feels_like, "
@@ -39,24 +41,16 @@ def parse_args():
     parser.add_argument("-u", "--units",
                         choices=["metric", "imperial", "standard"],
                         help="(default: metric)")
-    parser.add_argument("-v", "--version", action="store_true",
-                        help="show software version and copyright notice")
-
     ex_group = parser.add_mutually_exclusive_group()
-
     ex_group.add_argument("-g", "--geocoordinates",
                           help="geocoordintes of the form: latitude,longitude")
     ex_group.add_argument("-l", "--location",
                           help="a location of the format: city[,country]")
+    parser.add_argument("-v", "--version", action="store_true",
+                        help="show software version and copyright notice")
 
     args = parser.parse_args()
     return args
-
-def prompt(question):
-    answer = input(question).lower()
-    while answer not in ("yes", "no"):
-        answer = input("Please answer with 'yes' or 'no':").lower()
-    return answer
 
 def main():
     args = parse_args()
@@ -83,7 +77,10 @@ def main():
     elif get_value("location"):
         location = args.location
     else:
-        coords = util.guess_location(get_value)
+        coords = util.guess_location(get_value, debug=get_value("debug"))
+        # if prompt("Would you like to save this location for future"
+        #           " runs? (yes/no):") == "yes":
+        #     save_location(location)
 
     if not (coords or location):
         util.error("one of 'geocoordinates' or 'location' must be specified"
@@ -107,9 +104,10 @@ def main():
         coords = (geo_response[0]["lat"], geo_response[0]["lon"])
 
     else:
-        coords = util.separate(coords)
-        if len(coords) != 2:
-            util.error(f"invalid geocoordinates string: {coords}")
+        if isinstance(coords, str):
+            coords = util.separate(coords)
+            if len(coords) != 2:
+                util.error(f"invalid geocoordinates string: {coords}")
 
     when = get_value("when")
 

@@ -2,6 +2,8 @@
 
 import argparse
 import sys
+import owmlib
+from . import owm
 from . import util
 
 VERSION = "Terminal-weather version 0.1.0"
@@ -18,17 +20,19 @@ def parse_args():
     )
 
     parser.add_argument("when", nargs="?",
-                        choices=["now", "today", "tomorrow", "forecast"],
+                        choices=["now", "forecast"],
                         help="show weather data for the specified time period"
-                        " (default: today)")
+                        " (default: forecast)")
     parser.add_argument("-c", "--conf", help="configuration file")
     parser.add_argument("-C", "--color", choices=["yes", "no"],
                         help="enable colored output (default: yes). "
                         "This option is ignored when -j/--json is used")
     parser.add_argument("-f", "--fields", help="specify a comma-separated list"
                         " of fields to show, or 'all' to show all fields. "
-                        "Available fields are: feels_like, uvi, wind, humidity"
-                        ", pressure, daylight")
+                        "Available fields are: desc, temp, feels_like, "
+                        "temp_min, temp_max, pressure, humidity, sea_level, "
+                        "grnd_level, visibility, wind_speed, wind_deg, "
+                        "wind_gust, rain, clouds, sunrise, sunset.")
     parser.add_argument("-j", "--json", action="store_true",
                         help="show results in raw json format")
     parser.add_argument("-k", "--key", help="OpenWeatherMap API key")
@@ -65,8 +69,7 @@ def main():
 
     api_keys = get_value("key")
     if not api_keys:
-        print("Error: unable to find an API key", file=sys.stderr)
-        sys.exit(3)
+        util.error("unable to find any API keys", exit_code=3)
 
     location = None
     coords = None
@@ -83,6 +86,65 @@ def main():
         coords = util.guess_location(get_value)
 
     if not (coords or location):
-        print("Error: one of 'geocoordinates' or 'location' must be specified"
-              " to get the corresponding weather data", file=sys.stderr)
-        sys.exit(2)
+        util.error("one of 'geocoordinates' or 'location' must be specified"
+                   " to get the corresponding weather data")
+
+    if not coords:
+        location_parts = util.separate(location)
+        if len(location_parts) > 2 or not location_parts[0]:
+            util.error(f"invalid location string: {location}")
+
+        try:
+            geo_response = owmlib.geo_direct(
+                location_parts[0],
+                api_keys[-1],
+                country=location_parts[1] if len(location_parts) == 2 else '',
+                limit=1
+            )
+        except Exception as e:
+            util.error(str(e), exit_code=9)
+
+        coords = (geo_response[0]["lat"], geo_response[0]["lon"])
+
+    else:
+        coords = util.separate(coords)
+        if len(coords) != 2:
+            util.error(f"invalid geocoordinates string: {coords}")
+
+    when = get_value("when")
+
+    if when == "now":
+        data_func = owmlib.weather
+    else:
+        data_func = owmlib.forecast
+
+    try:
+        weather_data = data_func(
+            *coords,
+            api_keys[-1],
+            units=get_value("units")
+        )
+    except Exception as e:
+        util.error(str(e), exit_code=9)
+
+    if when == "forecast":
+        print("Under development")
+        sys.exit(0)
+
+    fields_str = get_value("fields")
+
+    if fields_str == "all":
+        fields = owm.FIELDS
+    else:
+        fields = util.separate(fields_str)
+        if not set(fields) <= set(owm.FIELDS):
+            util.error("invalid fields: "
+                       + ' '.join(set(fields) - set(owm.FIELDS)))
+
+    delim = '\n'
+    sep = ": "
+
+    print(delim.join(
+        sep.join((field, str(owm.get_field(weather_data, field)))) \
+        for field in fields
+    ))

@@ -77,8 +77,9 @@ def parse_conf(path, conf_spec):
                     sys.exit(3)
                 store_line(conf_spec, conf, line)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
+        error(f"An error occured while reading configuration file\n{e}",
+              exit_code=1,
+              prefix='')
 
     return lambda name: conf.get(name)
     
@@ -120,7 +121,7 @@ def init_conf(args):
     def lookup(var):
         try:
             value = getattr(args, var)
-            if value != None:
+            if value:
                 if var in CONF_SPEC["cumulative"]:
                     value = (value,)
                 return value
@@ -206,11 +207,11 @@ def separate(csv):
     """
     return tuple(value.strip() for value in csv.split(','))
 
-def error(msg, exit_code=2):
+def error(msg, exit_code=2, prefix="Error: "):
     """Exit with an error message.
 
     print the provided error message to stderr and exit with the given
     status code.
     """
-    print("Error:", msg, file=sys.stderr)
+    print(prefix, msg, sep='', file=sys.stderr)
     sys.exit(exit_code)

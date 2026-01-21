@@ -61,16 +61,23 @@ options:
 
 ## Configuration
 
-> Note: Command line arguments always take precendence over configuration
-file settings.
-
-Configuration file resolution order:
+### Configuration file resolution order:
 
 1. Command line option `-c`|`--conf`
 2. Environment variable `TERMINAL_WEATHER_CF`
 3. `$XDG_CONFIG_HOME/terminal-weather/conf`
 4. `$HOME/.config/terminal-weather/conf`
 5. `$HOME/.terminal-weather`
+
+### Notes
+
+- Command line arguments always take precendence over configuration
+file settings.
+- All command line options (excluding `help` and `version`)
+can be set in a configuration file using the long option name,
+e.g. `units=imperial`.
+- Flags (zero-argument options) can be set by assigning an arbirary string
+(excluding whitespace characters) to them. e.g. `json=yes` (`json=no` will have the same effect, the actual value is not interpreted).
 
 ## Exit status codes
 

@@ -22,25 +22,27 @@ def parse_args():
     parser.add_argument("when", nargs="?",
                         choices=["now", "forecast"],
                         help="show weather data for the specified time period"
-                        " (default: forecast)")
+                        f" (default: {util.DEFAULTS['when']})")
     parser.add_argument("-c", "--conf", help="configuration file")
     parser.add_argument("-C", "--color", choices=["yes", "no"],
-                        help="enable colored output (default: yes). "
+                        help="enable colored output (default: "
+                        f"{util.DEFAULTS['color']}). "
                         "This option is ignored when -j/--json is used")
     parser.add_argument("-d", "--debug", action="store_true",
                         help="enable debugging messages")
-    parser.add_argument("-f", "--fields", help="specify a comma-separated list"
-                        " of fields to show, or 'all' to show all fields. "
-                        "Available fields are: desc, temp, feels_like, "
-                        "temp_min, temp_max, pressure, humidity, sea_level, "
-                        "grnd_level, visibility, wind_speed, wind_deg, "
-                        "wind_gust, rain, clouds, sunrise, sunset.")
+    parser.add_argument("-f", "--fields",
+                        help="specify a comma-separated list of fields to show"
+                        f" (default: {util.DEFAULTS['fields']}), or 'all' to "
+                        "show all fields. Available fields are: desc, temp, "
+                        "feels_like, temp_min, temp_max, pressure, humidity, "
+                        "sea_level, grnd_level, visibility, wind_speed, "
+                        "wind_deg, wind_gust, rain, clouds, sunrise, sunset.")
     parser.add_argument("-j", "--json", action="store_true",
                         help="show results in raw json format")
     parser.add_argument("-k", "--key", help="OpenWeatherMap API key")
     parser.add_argument("-u", "--units",
                         choices=["metric", "imperial", "standard"],
-                        help="(default: metric)")
+                        help=f"(default: {util.DEFAULTS['units']})")
     ex_group = parser.add_mutually_exclusive_group()
     ex_group.add_argument("-g", "--geocoordinates",
                           help="geocoordintes of the form: latitude,longitude")
@@ -109,26 +111,6 @@ def main():
             if len(coords) != 2:
                 util.error(f"invalid geocoordinates string: {coords}")
 
-    when = get_value("when")
-
-    if when == "now":
-        data_func = owmlib.weather
-    else:
-        data_func = owmlib.forecast
-
-    try:
-        weather_data = data_func(
-            *coords,
-            api_keys[-1],
-            units=get_value("units")
-        )
-    except Exception as e:
-        util.error(str(e), exit_code=9)
-
-    if when == "forecast":
-        print("Under development")
-        sys.exit(0)
-
     fields_str = get_value("fields")
 
     if fields_str == "all":
@@ -139,10 +121,24 @@ def main():
             util.error("invalid fields: "
                        + ' '.join(set(fields) - set(owm.FIELDS)))
 
-    delim = '\n'
-    sep = "\t"
+    when = get_value("when")
+    format_params = { "sep": ": ", "field_delim": " | " }
 
-    print(delim.join(
-        sep.join((field.ljust(10), str(owm.get_field(weather_data, field)))) \
-        for field in fields
-    ))
+    if when == "now":
+        data_func = owmlib.weather
+        print_func = owm.print_ts
+    else:
+        data_func = owmlib.forecast
+        print_func = owm.print_forecast
+        format_params["ts_delim"] = '\n'
+    try:
+        weather_data = data_func(
+            *coords,
+            api_keys[-1],
+            units=get_value("units")
+        )
+
+        print_func(weather_data, fields, **format_params)
+
+    except Exception as e:
+        util.error(str(e), exit_code=9)

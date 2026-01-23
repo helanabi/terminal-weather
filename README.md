@@ -2,13 +2,15 @@
 
 Get current weather and forecasts for upcoming days
 
-`Todo: add demo GIFs`
+`todo: add demo GIF`
 
 ## Features
 
+- Support for location name and geocoordinates
 - City detection by IP address
-
-`todo`
+- Settings persistence through configuration file
+- Ability to select from multiple weather metrics
+- Togglable raw json data output
 
 ## Requirements
 
@@ -16,7 +18,7 @@ Get current weather and forecasts for upcoming days
 
 ## Installation
 
-`todo`
+`pip install git+https://github.com/helanabi/terminal-weather.git`
 
 ## Usage
 
@@ -24,13 +26,14 @@ Get current weather and forecasts for upcoming days
 usage: weather [-h] [-c CONF] [-C {yes,no}] [-d] [-f FIELDS] [-j] [-k KEY]
                [-u {metric,imperial,standard}] [-g GEOCOORDINATES |
                -l LOCATION] [-v]
-               [{now,forecast}]
+               [{now,today,tomorrow,forecast}]
 
 Get current weather and forecasts for upcoming days
 
 positional arguments:
-  {now,forecast}        show weather data for the specified time period
-                        (default: forecast)
+  {now,today,tomorrow,forecast}
+                        show weather data for the specified time period
+                        (default: now)
 
 options:
   -h, --help            show this help message and exit
@@ -38,12 +41,12 @@ options:
   -C, --color {yes,no}  enable colored output (default: yes). This option is
                         ignored when -j/--json is used
   -d, --debug           enable debugging messages
-  -f, --fields FIELDS   specify a comma-separated list of fields to show, or
-                        'all' to show all fields. Available fields are: desc,
-                        temp, feels_like, temp_min, temp_max, pressure,
-                        humidity, sea_level, grnd_level, visibility,
-                        wind_speed, wind_deg, wind_gust, rain, clouds,
-                        sunrise, sunset.
+  -f, --fields FIELDS   specify a comma-separated list of fields to show
+                        (default: desc,temp), or 'all' to show all fields.
+                        Available fields are: desc, temp, feels_like,
+                        temp_min, temp_max, pressure, humidity, sea_level,
+                        grnd_level, visibility, wind_speed, wind_deg,
+                        wind_gust, rain, clouds, sunrise, sunset.
   -j, --json            show results in raw json format
   -k, --key KEY         OpenWeatherMap API key
   -u, --units {metric,imperial,standard}
@@ -57,7 +60,12 @@ options:
 
 ## Examples
 
-`todo`
+- `weather`
+Print current weather for preconfigured location, otherwise attempt
+to auto-detect it and prompt user to save it.
+
+- `weather --fields visibility,wind_speed --location rabat,ma tomorrow`
+Show forecasted visibility and wind speed in Rabat (Morocco) tomorrow 
 
 ## Configuration
 
@@ -84,23 +92,18 @@ e.g. `units=imperial`.
 * `1`: filesystem error
 * `2`: bad usage
 * `3`: bad configuration
+* `4`: connection error
 * `9`: unknown error
-
-## Design notes
-
-`todo`
 
 ## Future Improvements
 
-- Custom output delimiter and separator
+- Better output format
+- Custom time range in forecasts
+- Custom output delimiters
 - Custom field labels
 - User defined colors
 - Weather icon in terminals that support it
 - Caching functionality for offline usage
-
-## Limitations
-
-`todo`
 
 ## License
 

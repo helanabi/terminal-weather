@@ -60,11 +60,11 @@ options:
 
 ## Examples
 
-- `weather`
+- `weather`  
 Print current weather for preconfigured location, otherwise attempt
 to auto-detect it and prompt user to save it.
 
-- `weather --fields visibility,wind_speed --location rabat,ma tomorrow`
+- `weather --fields visibility,wind_speed --location rabat,ma tomorrow`  
 Show forecasted visibility and wind speed in Rabat (Morocco) tomorrow 
 
 ## Configuration

@@ -23,3 +23,9 @@ weather = "terminal_weather.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/helanabi/terminal-weather"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

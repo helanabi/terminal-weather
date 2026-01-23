@@ -1,8 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import argparse
+import json
 import sys
 import owmlib
+
+from requests.exceptions import ConnectionError
+from . import output
 from . import owm
 from . import util
 
@@ -20,7 +24,7 @@ def parse_args():
     )
 
     parser.add_argument("when", nargs="?",
-                        choices=["now", "forecast"],
+                        choices=["now", "today", "tomorrow", "forecast"],
                         help="show weather data for the specified time period"
                         f" (default: {util.DEFAULTS['when']})")
     parser.add_argument("-c", "--conf", help="configuration file")
@@ -77,7 +81,7 @@ def main():
     elif get_value("geocoordinates"):
         coords = get_value("geocoordinates")
     elif get_value("location"):
-        location = args.location
+        location = get_value("location")
     else:
         coords = util.guess_location(get_value, debug=get_value("debug"))
         if util.prompt("Would you like to save this location for future"
@@ -122,23 +126,39 @@ def main():
                        + ' '.join(set(fields) - set(owm.FIELDS)))
 
     when = get_value("when")
-    format_params = { "sep": ": ", "field_delim": " | " }
+    format_params = { "sep": "\t", "field_delim": "\n" }
+    api_params = dict()
 
     if when == "now":
         data_func = owmlib.weather
-        print_func = owm.print_ts
+        print_func = output.print_ts
     else:
         data_func = owmlib.forecast
-        print_func = owm.print_forecast
-        format_params["ts_delim"] = '\n'
+        print_func = output.print_forecast
+        format_params["ts_delim"] = '\n---\n'
+
+        if when in ("today", "tomorrow"):
+            api_params["cnt"] = util.count_ts(when)
+
     try:
         weather_data = data_func(
             *coords,
             api_keys[-1],
-            units=get_value("units")
+            units=get_value("units"),
+            **api_params
         )
 
-        print_func(weather_data, fields, **format_params)
+        if args.json:
+            print(json.dumps(weather_data))
+        else:
+            print_func(weather_data, fields, **format_params)
+            
 
+    except ConnectionError:
+        util.error("cannot connect to the server. \n"
+                   "Please check your internet connection and try again.",
+                   exit_code=4)
     except Exception as e:
-        util.error(str(e), exit_code=9)
+        util.error(f"An error occured while trying to fetch data.\n{e}",
+                   exit_code=9,
+                   prefix='')

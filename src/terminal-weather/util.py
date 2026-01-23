@@ -1,16 +1,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""Configuration management and other utility functions.
+"""Configuration management and other utility functions."""
 
-Exported objects:
-  - init_conf(args): initialize config and make a lookup function
-  - get_location(conf): get user location data using geoip services
-"""
-
+import math
 import os
 import re
 import requests
 import sys
+
+from datetime import datetime
 
 CONF_FILE = None # automatically set by init_conf()
 CONF_SPEC = {
@@ -22,14 +20,15 @@ CONF_SPEC = {
         "color",
         "fields",
         "units",
-        "debug"
+        "debug",
+        "json"
     )
 }
 
 DEFAULTS = {
-    "when": "forecast",
+    "when": "now",
     "color": "yes",
-    "fields": "desc,temp,rain,wind_speed",
+    "fields": "desc,temp",
     "units": "metric"
 }
 
@@ -215,3 +214,24 @@ def error(msg, exit_code=2, prefix="Error: "):
     """
     print(prefix, msg, sep='', file=sys.stderr)
     sys.exit(exit_code)
+
+def count_ts(end):
+    """Return the number of timestamps until a given time.
+
+    timestamps are spaced with 3-hour intervals. Counting starts from the last
+    hour.
+
+    end -- string describing a point in time at which counting stops.
+    """
+
+    now = datetime.now()
+    next_day = { # each day ends at 00:00 of the next day 
+        "today": now.day+1,
+        "tomorrow": now.day+2
+    }
+
+    if end not in next_day:
+        return
+
+    delta = datetime(now.year, now.month, next_day[end], 0, 0) - now
+    return math.ceil(delta.total_seconds() / 3600 / 3)

@@ -18,7 +18,9 @@ Get current weather and forecasts for upcoming days
 
 ## Installation
 
-`pip install git+https://github.com/helanabi/terminal-weather.git`
+* `pip install git+https://github.com/helanabi/terminal-weather.git`
+
+> Temporarily: you need to manually create a configuration file with the content of `./conf`, until I implement an automated procedure to do that, e.g. copy the content of `./conf` to ~/.terminal-weather.
 
 ## Usage
 

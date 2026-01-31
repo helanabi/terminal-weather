@@ -27,7 +27,7 @@ rather than relying on deprecated automatic location resolution)
 ## Usage
 
 ```
-usage: weather [-h] [-c CONF] [-C {yes,no}] [-d] [-f FIELDS] [-j] [-k KEY]
+usage: weather [-h] [-c CONF] [-d DAYS] [-D] [-f FIELDS] [-j] [-k KEY]
                [-u {metric,imperial,standard}] [-g GEOCOORDINATES |
                -l LOCATION] [-v]
                [{now,today,tomorrow,forecast}]
@@ -42,15 +42,15 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   -c, --conf CONF       configuration file
-  -C, --color {yes,no}  enable colored output (default: yes). This option is
-                        ignored when -j/--json is used
-  -d, --debug           enable debugging messages
+  -d, --days DAYS       show weather forecasts for the specified day or a
+                        range of the form: [start],[end]
+  -D, --debug           enable debugging messages
   -f, --fields FIELDS   specify a comma-separated list of fields to show
                         (default: desc,temp), or 'all' to show all fields.
                         Available fields are: desc, temp, feels_like,
                         temp_min, temp_max, pressure, humidity, sea_level,
                         grnd_level, visibility, wind_speed, wind_deg,
-                        wind_gust, rain, clouds, sunrise, sunset.
+                        wind_gust, rain, clouds, sunrise, sunset
   -j, --json            show results in raw json format
   -k, --key KEY         OpenWeatherMap API key
   -u, --units {metric,imperial,standard}
@@ -58,7 +58,7 @@ options:
   -g, --geocoordinates GEOCOORDINATES
                         geocoordintes of the form: latitude,longitude
   -l, --location LOCATION
-                        a location of the format: city[,country]
+                        a location of the form: city[,country]
   -v, --version         show software version and copyright notice
 ```
 
@@ -68,13 +68,13 @@ options:
 Print current weather for preconfigured location, otherwise attempt
 to auto-detect it and prompt user to save it.
 
-- `weather today`
+- `weather today`  
 Show weather forecasts for today (this is an alias for `weather --days 0`).
 
 - `weather --fields visibility,wind_speed --location rabat,ma tomorrow`  
 Show forecasted visibility and wind speed in Rabat (Morocco) tomorrow.
 
-- `weather --days 1,3 -f rain,clouds --geocoordinates 33,-6`
+- `weather --days 1,3 -f rain,clouds --geocoordinates 33,-6`  
 Show forecasted rain and clouds for three days starting tomorrow
 in the location with geocoordinates: latitude=33 and longitude=-6.
 

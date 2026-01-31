@@ -27,14 +27,19 @@ def format_value(field, value, context):
     # todo: add units
 
     if field == "dt":
-        return format_time(value + context["timezone"])
+        return format_time(value + context["timezone"], context["time-format"])
     return str(value)
 
-def format_time(timestamp):
+def format_time(timestamp, fstr):
     """Make a representation time string for a unix timestamp."""
-    return str(datetime.fromtimestamp(timestamp))
+    return datetime.fromtimestamp(timestamp).strftime(fstr)
 
-def print_forecast(forecast_dict, fields, sep, field_delim, ts_delim):
+def print_forecast(forecast_dict,
+                   fields,
+                   sep,
+                   field_delim,
+                   ts_delim,
+                   time_format):
     """Extract and print a list of weather timestamps for specific fields."""
 
     # Separate daylight fields
@@ -49,7 +54,8 @@ def print_forecast(forecast_dict, fields, sep, field_delim, ts_delim):
     timestamps = forecast_dict["list"]
     for i, ts in enumerate(timestamps):
         print_data(ts, fields, end='', context={
-            "timezone": owm.grep_forecast(forecast_dict, "timezone")
+            "timezone": owm.grep_forecast(forecast_dict, "timezone"),
+            "time-format": time_format
         })
         if i < len(timestamps) - 1:
             print(ts_delim, end='')

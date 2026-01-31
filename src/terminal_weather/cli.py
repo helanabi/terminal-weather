@@ -6,6 +6,7 @@ import sys
 import owmlib
 
 from requests.exceptions import ConnectionError
+from . import config
 from . import output
 from . import owm
 from . import util
@@ -22,36 +23,36 @@ def parse_args():
         prog="weather",
         description="Get current weather and forecasts for upcoming days"
     )
-
-    parser.add_argument("when", nargs="?",
+    # todo: Add --no-prompt flag for non-interactive usage
+    period_meg = parser.add_mutually_exclusive_group()
+    period_meg.add_argument("when", nargs="?",
                         choices=["now", "today", "tomorrow", "forecast"],
                         help="show weather data for the specified time period"
-                        f" (default: {util.DEFAULTS['when']})")
+                        f" (default: {config.DEFAULTS['when']})")
     parser.add_argument("-c", "--conf", help="configuration file")
-    parser.add_argument("-C", "--color", choices=["yes", "no"],
-                        help="enable colored output (default: "
-                        f"{util.DEFAULTS['color']}). "
-                        "This option is ignored when -j/--json is used")
-    parser.add_argument("-d", "--debug", action="store_true",
+    period_meg.add_argument("-d", "--days",
+                            help="show weather forecasts for the specified "
+                            "day or a range of the form: [start],[end]")
+    parser.add_argument("-D", "--debug", action="store_true",
                         help="enable debugging messages")
     parser.add_argument("-f", "--fields",
                         help="specify a comma-separated list of fields to show"
-                        f" (default: {util.DEFAULTS['fields']}), or 'all' to "
+                        f" (default: {config.DEFAULTS['fields']}), or 'all' to "
                         "show all fields. Available fields are: desc, temp, "
                         "feels_like, temp_min, temp_max, pressure, humidity, "
                         "sea_level, grnd_level, visibility, wind_speed, "
-                        "wind_deg, wind_gust, rain, clouds, sunrise, sunset.")
+                        "wind_deg, wind_gust, rain, clouds, sunrise, sunset")
     parser.add_argument("-j", "--json", action="store_true",
                         help="show results in raw json format")
     parser.add_argument("-k", "--key", help="OpenWeatherMap API key")
     parser.add_argument("-u", "--units",
                         choices=["metric", "imperial", "standard"],
-                        help=f"(default: {util.DEFAULTS['units']})")
-    ex_group = parser.add_mutually_exclusive_group()
-    ex_group.add_argument("-g", "--geocoordinates",
+                        help=f"(default: {config.DEFAULTS['units']})")
+    location_meg = parser.add_mutually_exclusive_group()
+    location_meg.add_argument("-g", "--geocoordinates",
                           help="geocoordintes of the form: latitude,longitude")
-    ex_group.add_argument("-l", "--location",
-                          help="a location of the format: city[,country]")
+    location_meg.add_argument("-l", "--location",
+                          help="a location of the form: city[,country]")
     parser.add_argument("-v", "--version", action="store_true",
                         help="show software version and copyright notice")
 
@@ -65,7 +66,7 @@ def main():
         print(COPYRIGHT)
         sys.exit(0)
 
-    get_value = util.init_conf(args)
+    get_value = config.init_conf(args)
 
     api_keys = get_value("key")
     if not api_keys:
@@ -84,9 +85,10 @@ def main():
         location = get_value("location")
     else:
         coords = util.guess_location(get_value, debug=get_value("debug"))
+        # todo: only prompt to save if location was guessed correctly
         if util.prompt("Would you like to save this location for future"
                   " runs? (yes/no):") == "yes":
-            util.write_conf("geocoordinates", ','.join(map(str, coords)))
+            config.write_conf("geocoordinates", ','.join(map(str, coords)))
 
     if not (coords or location):
         util.error("one of 'geocoordinates' or 'location' must be specified"
@@ -125,20 +127,29 @@ def main():
             util.error("invalid fields: "
                        + ' '.join(set(fields) - set(owm.FIELDS)))
 
-    when = get_value("when")
+    days = None
+    
+    if args.days:
+        days = util.parse_days(args.days)
+    elif args.when and args.when != "now":
+        days = util.word_to_days(args.when)
+    elif not args.when and get_value("days"):
+        days = util.parse_days(get_value("days"))
+    elif get_value("when") != "now":
+        days = util.word_to_days(get_value("when"))
+
     format_params = { "sep": "\t", "field_delim": "\n" }
     api_params = dict()
 
-    if when == "now":
-        data_func = owmlib.weather
-        print_func = output.print_ts
-    else:
+    if days:
         data_func = owmlib.forecast
         print_func = output.print_forecast
-        format_params["ts_delim"] = '\n---\n'
-
-        if when in ("today", "tomorrow"):
-            api_params["cnt"] = util.count_ts(when)
+        format_params.update(ts_delim='\n---\n',
+                             time_format=get_value("time-format"))
+        api_params["cnt"] = util.count_ts(days[-1])
+    else:
+        data_func = owmlib.weather
+        print_func = output.print_ts
 
     try:
         weather_data = data_func(
@@ -151,13 +162,9 @@ def main():
         if args.json:
             print(json.dumps(weather_data))
         else:
+            # todo: add location field to output
             print_func(weather_data, fields, **format_params)
-            
 
-    except ConnectionError:
-        util.error("cannot connect to the server. \n"
-                   "Please check your internet connection and try again.",
-                   exit_code=4)
     except Exception as e:
         util.error(f"An error occured while trying to fetch data.\n{e}",
                    exit_code=9,

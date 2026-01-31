@@ -2,6 +2,8 @@
 
 """OpenWeatherMap related processing."""
 
+MAX_DAYS = 5
+
 FIELDS = (
     "desc",
     "temp",

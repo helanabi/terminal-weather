@@ -6,6 +6,8 @@ Get current weather and forecasts for upcoming days
 
 ## Features
 
+- Based on maintained OpenWeatherMap API features (e.g. uses geocoding API
+rather than relying on deprecated automatic location resolution)
 - Support for location name and geocoordinates
 - City detection by IP address
 - Settings persistence through configuration file
@@ -20,7 +22,7 @@ Get current weather and forecasts for upcoming days
 
 * `pip install git+https://github.com/helanabi/terminal-weather.git`
 
-> Temporarily: you need to manually create a configuration file with the content of `./conf`, until I implement an automated procedure to do that, e.g. copy the content of `./conf` to ~/.terminal-weather.
+> Temporarily: you need to manually create a configuration file with the content of `./conf`, until I implement an automated procedure to do that, e.g. copy the content of `./conf` to `~/.terminal-weather`.
 
 ## Usage
 
@@ -66,8 +68,15 @@ options:
 Print current weather for preconfigured location, otherwise attempt
 to auto-detect it and prompt user to save it.
 
+- `weather today`
+Show weather forecasts for today (this is an alias for `weather --days 0`).
+
 - `weather --fields visibility,wind_speed --location rabat,ma tomorrow`  
-Show forecasted visibility and wind speed in Rabat (Morocco) tomorrow 
+Show forecasted visibility and wind speed in Rabat (Morocco) tomorrow.
+
+- `weather --days 1,3 -f rain,clouds --geocoordinates 33,-6`
+Show forecasted rain and clouds for three days starting tomorrow
+in the location with geocoordinates: latitude=33 and longitude=-6.
 
 ## Configuration
 
@@ -94,20 +103,21 @@ e.g. `units=imperial`.
 * `1`: filesystem error
 * `2`: bad usage
 * `3`: bad configuration
-* `4`: connection error
 * `9`: unknown error
 
 ## Future Improvements
 
+- Automated configuration file generation
 - Better output format
 - Custom time range in forecasts
 - Custom output delimiters
 - Custom field labels
-- User defined colors
 - Weather icon in terminals that support it
+- Hide field label when only one field is requested
+- Country name-to-code conversion and vice-versa
 - Caching functionality for offline usage
 
 ## License
 
-This project is licensed under the GNU General Public License v3.0 or later.
+This project is licensed under the GNU General Public License v3.0 or later.  
 See the COPYING file for details.

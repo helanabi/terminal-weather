@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-"""OpenWeatherMap related processing."""
+"""OpenWeatherMap related data and procedures."""
 
 MAX_DAYS = 5
 
@@ -37,7 +37,7 @@ def grep_weather(weather_dict, field):
                    "sea_level",
                    "grnd_level"):
         return weather_dict["main"].get(field)
-    elif field in ("dt", "visibility"):
+    elif field in ("dt", "visibility", "timezone"):
         return weather_dict.get(field)
     elif field.startswith("wind_"):
         metric = field.split('_', maxsplit=1)[1]

@@ -15,6 +15,12 @@ def print_ts(weather_dict,
              context=None):
     """Extract and print specific fields from a weather dictionary."""
 
+    if not isinstance(context, dict):
+        context = dict()
+
+    if not context.get("timezone"):
+        context["timezone"] = lookup(weather_dict, "timezone")
+
     print(field_delim.join(
         sep.join(
             (field, format_value(field, lookup(weather_dict, field), context))
@@ -22,12 +28,15 @@ def print_ts(weather_dict,
     ), end=end)
 
 def format_value(field, value, context):
-    """Make a printable string of a given field value."""
+    """Make a string representation for a field value."""
 
     # todo: add units
 
-    if field == "dt":
-        return format_time(value + context["timezone"], context["time-format"])
+    if field in ("dt", "sunrise", "sunset"):
+        return format_time(
+            value + context["timezone"],
+            context["time-format"] if field == "dt" else "%I:%M"
+        )
     return str(value)
 
 def format_time(timestamp, fstr):
@@ -46,17 +55,17 @@ def print_forecast(forecast_dict,
     daylight_fields = tuple(f for f in ("sunrise", "sunset") if f in fields)
     fields = tuple(f for f in ("dt",*fields) if f not in daylight_fields)
 
-    print_data = partial(print_ts, sep=sep, field_delim=field_delim)
-
     if not forecast_dict.get("list"):
         return
 
+    print_data = partial(print_ts, sep=sep, field_delim=field_delim, context={
+        "timezone": owm.grep_forecast(forecast_dict, "timezone"),
+        "time-format": time_format
+    })
+
     timestamps = forecast_dict["list"]
     for i, ts in enumerate(timestamps):
-        print_data(ts, fields, end='', context={
-            "timezone": owm.grep_forecast(forecast_dict, "timezone"),
-            "time-format": time_format
-        })
+        print_data(ts, fields, end='')
         if i < len(timestamps) - 1:
             print(ts_delim, end='')
 

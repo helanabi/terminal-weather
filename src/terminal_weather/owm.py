@@ -4,8 +4,10 @@
 
 MAX_DAYS = 5
 
+# todo: change to namedtuples
 FIELDS = (
     # label, unit
+    ("city", ''),
     ("desc", ''),
     ("temp", "temp"),
     ("feels_like", "temp"),
@@ -71,7 +73,11 @@ def grep_weather(weather_dict, field):
         return weather_dict.get("clouds") and weather_dict["clouds"].get("all") 
     elif field in ("sunrise","sunset"):
         return weather_dict["sys"].get(field)
+    elif field == "city":
+        return weather_dict.get("name")
 
 def grep_forecast(forecast_dict, field):
     if field in ("timezone", "sunrise", "sunset"):
         return forecast_dict.get("city") and forecast_dict["city"].get(field)
+    if field == "city":
+        return forecast_dict.get("city", {}).get("name")

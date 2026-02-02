@@ -25,7 +25,7 @@ CONF_SPEC = {
 
 DEFAULTS = {
     "when": "now",
-    "fields": "desc,temp",
+    "fields": "city,desc,temp",
     "time-format": "%a %e %b %l %p",
     "units": "metric"
 }

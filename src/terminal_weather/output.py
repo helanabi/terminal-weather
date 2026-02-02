@@ -7,40 +7,37 @@ from functools import partial
 from . import owm
 
 def print_ts(weather_dict,
-             fields,
+             fields, *,
              sep,
              field_delim,
+             units,
              end='\n',
              lookup=owm.grep_weather,
-             context=None,
-             units=None):
+             timezone=None,
+             time_format=None):
     """Extract and print specific fields from a weather dictionary."""
-    # todo: do you really need context?
-    if not isinstance(context, dict):
-        context = dict()
-
-    if not context.get("timezone"):
-        context["timezone"] = lookup(weather_dict, "timezone")
-
-    if units:
-        context.update(units=units)
 
     print(field_delim.join(
         sep.join(
-            (field, format_value(field, lookup(weather_dict, field), context))
+            (field, format_value(
+                field,
+                lookup(weather_dict, field),
+                timezone=timezone or lookup(weather_dict, "timezone"),
+                time_format=time_format,
+                units=units))
         ) for field in fields
     ), end=end)
 
-def format_value(field, value, context):
+def format_value(field, value, timezone, time_format, units):
     """Make a string representation for a field value."""
 
     if field in ("dt", "sunrise", "sunset"):
         return format_time(
-            value + context["timezone"],
-            context["time-format"] if field == "dt" else "%I:%M"
+            value + (timezone or 0),
+            time_format if field == "dt" else "%I:%M"
         )
 
-    unit = owm.get_unit(field, context["units"])
+    unit = owm.get_unit(field, units)
     if unit:
         return f"{value} {unit}"
     else:
@@ -59,32 +56,35 @@ def print_forecast(forecast_dict,
                    time_format):
     """Extract and print a list of weather timestamps for specific fields."""
 
-    # Separate daylight fields
-    daylight_fields = tuple(f for f in ("sunrise", "sunset") if f in fields)
-    fields = tuple(f for f in ("dt",*fields) if f not in daylight_fields)
+    global_fields = ("city", "sunrise", "sunset")
+    global_fields = tuple(filter(lambda f: f in global_fields, fields))
+    fields = tuple(filter(lambda f: f not in global_fields, ("dt",*fields)))
 
     if not forecast_dict.get("list"):
         return
 
-    print_data = partial(print_ts, sep=sep, field_delim=field_delim, context={
-        "timezone": owm.grep_forecast(forecast_dict, "timezone"),
-        "time-format": time_format
-    }, units=units)
+    print_data = partial(print_ts,
+                         sep=sep,
+                         field_delim=field_delim,
+                         units=units,
+                         timezone=owm.grep_forecast(forecast_dict, "timezone"),
+                         time_format=time_format)
 
     timestamps = forecast_dict["list"]
+
+    if global_fields:
+        global_dict = dict(
+            (f, owm.grep_forecast(forecast_dict, f)) for f in global_fields
+        )
+        print_data(global_dict,
+                 global_fields,
+                 lookup=lambda d,k: d.get(k),
+                 end='')
+        if timestamps:
+            print(ts_delim, end='')
+
     for i, ts in enumerate(timestamps):
         print_data(ts, fields, end='')
         if i < len(timestamps) - 1:
             print(ts_delim, end='')
-
-    if daylight_fields:
-        if timestamps:
-            print(ts_delim, end='')
-        daylight_data = dict(
-            (f, owm.grep_forecast(forecast_dict, f)) for f in daylight_fields
-        )
-        print_data(daylight_data,
-                 daylight_fields,
-                 lookup=lambda d,k: d.get(k),
-                 end='')
     print()

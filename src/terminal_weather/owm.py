@@ -5,24 +5,44 @@
 MAX_DAYS = 5
 
 FIELDS = (
-    "desc",
-    "temp",
-    "feels_like",
-    "temp_min",
-    "temp_max",
-    "pressure",
-    "humidity",
-    "sea_level",
-    "grnd_level",
-    "visibility",
-    "wind_speed",
-    "wind_deg",
-    "wind_gust",
-    "rain",
-    "clouds",
-    "sunrise",
-    "sunset"
+    # label, unit
+    ("desc", ''),
+    ("temp", "temp"),
+    ("feels_like", "temp"),
+    ("temp_min", "temp"),
+    ("temp_max", "temp"),
+    ("pressure", "pressure"),
+    ("humidity", "percent"),
+    ("sea_level", "pressure"),
+    ("grnd_level", "pressure"),
+    ("visibility", "distance"),
+    ("wind_speed", "speed"),
+    ("wind_deg", "angle"),
+    ("wind_gust", "speed"),
+    ("rain", "volume"),
+    ("clouds", "percent"),
+    ("sunrise", ''),
+    ("sunset", '')
 )
+
+UNITS = {
+    # standard, metric, imperial
+    "temp": ('K', "°C", "°F"),
+    "pressure": ("hPa",)*3,
+    "percent": ('%',)*3,
+    "distance": ('m',)*3,
+    "speed": ("m/s", "m/s", 'mph'),
+    "angle": ('°',)*3,
+    "volume": ("mm",)*3, # I know volume is 3D. It isn't my fault!
+}
+
+def list_fields():
+    return tuple(map(lambda t: t[0], FIELDS))
+
+def get_unit(field, sys):
+    systems = ("standard", "metric", "imperial")
+    unit_type = next(filter(lambda t: t[0] == field, FIELDS))[1]
+    return unit_type and UNITS[unit_type][systems.index(sys)]
 
 def grep_weather(weather_dict, field):
     """Find the value of a field in an OWM response dictionary."""
@@ -42,6 +62,7 @@ def grep_weather(weather_dict, field):
     elif field.startswith("wind_"):
         metric = field.split('_', maxsplit=1)[1]
         return weather_dict.get("wind") and weather_dict["wind"].get(metric)
+    # todo: process rain.3h
     elif field == "rain":
         return weather_dict.get("rain") \
             and weather_dict["rain"].get("1h") \

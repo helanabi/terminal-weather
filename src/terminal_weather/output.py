@@ -12,14 +12,18 @@ def print_ts(weather_dict,
              field_delim,
              end='\n',
              lookup=owm.grep_weather,
-             context=None):
+             context=None,
+             units=None):
     """Extract and print specific fields from a weather dictionary."""
-
+    # todo: do you really need context?
     if not isinstance(context, dict):
         context = dict()
 
     if not context.get("timezone"):
         context["timezone"] = lookup(weather_dict, "timezone")
+
+    if units:
+        context.update(units=units)
 
     print(field_delim.join(
         sep.join(
@@ -30,14 +34,17 @@ def print_ts(weather_dict,
 def format_value(field, value, context):
     """Make a string representation for a field value."""
 
-    # todo: add units
-
     if field in ("dt", "sunrise", "sunset"):
         return format_time(
             value + context["timezone"],
             context["time-format"] if field == "dt" else "%I:%M"
         )
-    return str(value)
+
+    unit = owm.get_unit(field, context["units"])
+    if unit:
+        return f"{value} {unit}"
+    else:
+        return str(value)
 
 def format_time(timestamp, fstr):
     """Make a representation time string for a unix timestamp."""
@@ -47,6 +54,7 @@ def print_forecast(forecast_dict,
                    fields,
                    sep,
                    field_delim,
+                   units,
                    ts_delim,
                    time_format):
     """Extract and print a list of weather timestamps for specific fields."""
@@ -61,7 +69,7 @@ def print_forecast(forecast_dict,
     print_data = partial(print_ts, sep=sep, field_delim=field_delim, context={
         "timezone": owm.grep_forecast(forecast_dict, "timezone"),
         "time-format": time_format
-    })
+    }, units=units)
 
     timestamps = forecast_dict["list"]
     for i, ts in enumerate(timestamps):

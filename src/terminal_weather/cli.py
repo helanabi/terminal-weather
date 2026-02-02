@@ -118,14 +118,15 @@ def main():
                 util.error(f"invalid geocoordinates string: {coords}")
 
     fields_str = get_value("fields")
+    all_fields = owm.list_fields()
 
     if fields_str == "all":
-        fields = owm.FIELDS
+        fields = all_fields
     else:
         fields = util.separate(fields_str)
-        if not set(fields) <= set(owm.FIELDS):
+        if not set(fields) <= set(all_fields):
             util.error("invalid fields: "
-                       + ' '.join(set(fields) - set(owm.FIELDS)))
+                       + ' '.join(set(fields) - set(all_fields)))
 
     days = None
     
@@ -138,8 +139,9 @@ def main():
     elif get_value("when") != "now":
         days = util.word_to_days(get_value("when"))
 
-    format_params = { "sep": "\t", "field_delim": "\n" }
-    api_params = dict()
+    units = get_value("units")
+    api_params = { "units": units }
+    format_params = { "sep": "\t", "field_delim": "\n", "units": units }
 
     if days:
         data_func = owmlib.forecast
@@ -152,12 +154,7 @@ def main():
         print_func = output.print_ts
 
     try:
-        weather_data = data_func(
-            *coords,
-            api_keys[-1],
-            units=get_value("units"),
-            **api_params
-        )
+        weather_data = data_func(*coords, api_keys[-1], **api_params)
 
         if args.json:
             print(json.dumps(weather_data))

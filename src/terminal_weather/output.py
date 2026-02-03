@@ -17,9 +17,11 @@ def print_ts(weather_dict,
              time_format=None):
     """Extract and print specific fields from a weather dictionary."""
 
+    padding = max(map(len, fields))
+
     print(field_delim.join(
         sep.join(
-            (field, format_value(
+            (field.ljust(padding), format_value(
                 field,
                 lookup(weather_dict, field),
                 timezone=timezone or lookup(weather_dict, "timezone"),

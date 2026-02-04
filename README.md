@@ -107,6 +107,7 @@ e.g. `units=imperial`.
 
 ## Future Improvements
 
+- Add configuration entry: ljust-width
 - Automated configuration file generation
 - Better output format
 - Custom time range in forecasts
@@ -114,8 +115,21 @@ e.g. `units=imperial`.
 - Custom field labels
 - Weather icon in terminals that support it
 - Hide field label when only one field is requested
+- Add fields: pop, snow
 - Country name-to-code conversion and vice-versa
+- Custom units (symbol + formula)
+- Custom time zone
+- Add --no-prompt flag for non-interactive usage
 - Caching functionality for offline usage
+
+## Limitations
+
+- Currently the program uses an OpenWeatherMap free tier API key, that has
+a rate limit (60 calls/minute) and monthly quota (1M calls/month).
+Thankfully this is plenty for a few users, but it isn't scalable.
+However, anyone can get a free API key from OWM and pass it to the program
+as a command line argument `(-k/--key)`, or even better permanently set it
+in the configuration file.
 
 ## License
 

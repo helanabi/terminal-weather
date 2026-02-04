@@ -2,7 +2,8 @@
 
 """OpenWeatherMap related data and procedures."""
 
-MAX_DAYS = 5
+MAX_DAYS = 5 # maximum number of days in weather forecasts
+INTERVAL = 3 # number of hours between weather data records
 
 # todo: change to namedtuples
 FIELDS = (

@@ -3,8 +3,9 @@
 """Utility functions."""
 
 import math
-import requests
+import re
 import sys
+import requests
 
 from datetime import datetime
 from . import owm
@@ -78,52 +79,57 @@ def error(msg, exit_code=2, prefix="Error: "):
     print(prefix, msg, sep='', file=sys.stderr)
     sys.exit(exit_code)
 
-def count_ts(day=owm.MAX_DAYS):
-    """Return the number of timestamps until last hour of a given day.
+def count_ts(day, interval=owm.INTERVAL):
+    """Return the number of timestamps until last hour of a given day."""
+    return math.ceil((23 - datetime.now().hour + day * 24) / interval)
 
-    timestamps are spaced with 3-hour intervals. Counting starts from the last
-    hour, and continues until the last hour of the given day.
-
-    day -- int, 0 means today, each successive day is 1 greater.
-    """
-    # todo: implement function
-
-    return 3
-    
-    # now = datetime.now()
-    # next_day = { # each day ends at 00:00 of the next day 
-    #     "today": now.day+1,
-    #     "tomorrow": now.day+2
-    # }
-
-    # if end not in next_day:
-    #     return
-
-    # # todo: fix month boundary bug (e.i. today=30)
-    # delta = datetime(now.year, now.month, next_day[end], 0, 0) - now
-    # return math.ceil(delta.total_seconds() / 3600 / 3)
-
-def word_to_days(word):
+def word_to_days(word, max_days=owm.MAX_DAYS):
     """Convert a word to a day range.
 
     Make a tuple of a single digit for a day number, or two digits for
     start-day and end-day of a day range
     
-    word -- any valid argument string to parameter "when"
+    word -- any valid argument string to parameter "when" (other than "now").
     """
-    # todo: implement function
 
     if word == "today":
         return (0,)
-    else:
+    if word == "tomorrow":
         return (1,)
+    if word == "forecast":
+        return (0, max_days)
 
-def parse_days(csv):
+    error('invalid value for parameter "when": ' + word, exit_code=3)
+
+def parse_days(csv, max_days=owm.MAX_DAYS):
     """Parse and convert a string value passed to the argument "days".
 
-    Make a tuple of two digits at most, from a string representing a day number
-    or a comma-separated range of days. Empty strings become None, and invalid
-    values cause the interpreter to exit with an error.
+    Make a tuple of two digits at most representing a day range.
+    Invalid values cause the interpreter to exit with an error.
+
+    csv -- str, representing a day number or a comma-separated range of days.
     """
-    # todo: implement function
-    return (2,3)
+
+    def fail(info=''):
+        msg = 'invalid value of argument "days": ' + csv
+        if info:
+            msg += f"\n{info}"
+        error(msg)
+
+    if not re.match("^[0-9]*,?[0-9]*$", csv):
+        fail()
+
+    days = list(separate(csv))
+
+    if len(days) == 2:
+        if days[0] == '':
+            days[0] = 0
+        if days[1] == '':
+            days[1] = max_days
+
+    days= tuple(map(int, days))
+
+    if len(days) == 2 and days[0] > days[1]:
+        fail("First day must be less than or equal to second day")
+
+    return days

@@ -97,8 +97,6 @@ def resolve_cf(args):
         if cf:
             return cf
 
-# todo: migrate conf handling into a separate module
-# todo: add a test suite for init_conf()
 def init_conf(args):
     """Make a function to lookup values from args, config and defaults.
 

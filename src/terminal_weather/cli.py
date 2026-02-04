@@ -23,7 +23,6 @@ def parse_args():
         prog="weather",
         description="Get current weather and forecasts for upcoming days"
     )
-    # todo: Add --no-prompt flag for non-interactive usage
     period_meg = parser.add_mutually_exclusive_group()
     period_meg.add_argument("when", nargs="?",
                         choices=["now", "today", "tomorrow", "forecast"],
@@ -147,7 +146,9 @@ def main():
         data_func = owmlib.forecast
         print_func = output.print_forecast
         format_params.update(ts_delim='\n---\n',
-                             time_format=get_value("time-format"))
+                             time_format=get_value("time-format"),
+                             start_day=days[0],
+                             end_day=days[-1])
         api_params["cnt"] = util.count_ts(days[-1])
     else:
         data_func = owmlib.weather
@@ -159,7 +160,6 @@ def main():
         if args.json:
             print(json.dumps(weather_data))
         else:
-            # todo: add location field to output
             print_func(weather_data, fields, **format_params)
 
     except Exception as e:

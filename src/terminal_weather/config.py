@@ -68,7 +68,7 @@ def parse_conf(path, conf_spec):
                 line = line.strip()
                 if not line:
                     continue
-                if not re.search('^[a-z]+(-[a-z]+)*=', line):
+                if not re.match('[a-z]+(-[a-z]+)*=', line):
                     print("Error: invalid configuration entry:" + entry,
                           file=sys.stderr)
                     sys.exit(3)

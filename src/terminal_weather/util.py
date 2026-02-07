@@ -116,7 +116,7 @@ def parse_days(csv, max_days=owm.MAX_DAYS):
             msg += f"\n{info}"
         error(msg)
 
-    if not re.match("^[0-9]*,?[0-9]*$", csv):
+    if not re.fullmatch("[0-9]*,?[0-9]*", csv):
         fail()
 
     days = list(separate(csv))

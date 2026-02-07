@@ -7,21 +7,22 @@ class Args:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-def test_lookup(tmp_path):
-    os.environ.clear()
+@pytest.fixture
+def conf_file(tmp_path):
+    with open(os.path.join(tmp_path, "sample_conf"), 'w') as f:
+        yield f
 
+def test_lookup(conf_file):
     config.DEFAULTS["default"] = "default value"
     config.CONF_SPEC["testing"] = ("conf-opt",)
     config.CONF_SPEC["cumulative"] = ("conf-list","arglist")
 
+    conf_file.write("conf-opt=conf value\n"
+                    "conf-list=first\n"
+                    "conf-list=second\n")
+    conf_file.flush()
 
-    conf_file = os.path.join(tmp_path, "sample_conf")
-    with open(conf_file, 'w') as f:
-        f.write("conf-opt=conf value\n"
-                "conf-list=first\n"
-                "conf-list=second\n")
-
-    args = Args(conf=conf_file,
+    args = Args(conf=conf_file.name,
                 argopt="arg value",
                 arglist="inside iterable")
 
@@ -40,6 +41,38 @@ def test_lookup(tmp_path):
     arglist = lookup("arglist")
     assert len(arglist) == 1
     assert arglist[0] == "inside iterable"
+
+def test_cf_overrides(conf_file, tmp_path):
+    os.environ.clear()
+    args = Args(conf=None)
+
+    def mock_path(base, *path):
+        os.environ.update({ base: str(tmp_path) })
+        filepath = tmp_path
+        if len(path) > 1:
+            filepath = os.path.join(filepath, *path[:-1])
+            os.makedirs(filepath)
+        filepath = os.path.join(filepath, path[-1])
+        with open(filepath, 'w') as f:
+            pass
+
+    def compare(expected):
+        config.init_conf(args)
+        assert config.CONF_FILE == expected
+
+    def test_path(base, *path):
+        mock_path(base, *path)
+        compare(os.path.join(tmp_path, *path))
+
+    test_path("HOME", ".terminal-weather")
+    test_path("HOME", ".config", "terminal-weather", "conf")
+    test_path("XDG_CONFIG_HOME", "terminal-weather", "conf")
+
+    os.environ.update(TERMINAL_WEATHER_CF=os.path.join(tmp_path, "env_conf"))
+    test_path("HOME", "env_conf")
+
+    setattr(args, "conf", conf_file.name),
+    compare(conf_file.name)
 
 # def test_space():
 #     conf = {}

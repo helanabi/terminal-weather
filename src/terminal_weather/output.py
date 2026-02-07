@@ -36,6 +36,9 @@ def print_ts(weather_dict,
 def format_value(field, value, tzinfo, time_format, units):
     """Make a string representation for a field value."""
 
+    if value == None:
+        return '-'
+
     if field in ("dt", "sunrise", "sunset"):
         utc_time = datetime.fromtimestamp(value, tz=timezone.utc)
         return utc_time.astimezone(tz=tzinfo).strftime(

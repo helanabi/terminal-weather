@@ -84,9 +84,9 @@ def main():
         location = get_value("location")
     else:
         coords = util.guess_location(get_value, debug=get_value("debug"))
-        # todo: only prompt to save if location was guessed correctly
-        if util.prompt("Would you like to save this location for future"
-                  " runs? (yes/no):") == "yes":
+        if coords and \
+           util.prompt("Would you like to save this location for future runs? "
+                       "(yes/no):") == "yes":
             config.write_conf("geocoordinates", ','.join(map(str, coords)))
 
     if not (coords or location):

@@ -4,15 +4,16 @@ Get current weather and forecasts for upcoming days
 
 `todo: add demo GIF`
 
-## Features
+## Notable Features
 
-- Based on maintained OpenWeatherMap API features (e.g. uses geocoding API
-rather than relying on deprecated automatic location resolution)
-- Support for location name and geocoordinates
+- Based on currently maintained OpenWeatherMap API features[^1]
+- Current weather for any location on earth
+- Support for both location name and geocoordinates
 - City detection by IP address
-- Settings persistence through configuration file
-- Ability to select from multiple weather metrics
+- Weather forecasts for specific days or custom day-ranges
+- 18 available fields related to temperature, pressure, wind and more
 - Togglable raw json data output
+- Settings persistence through configuration file
 
 ## Requirements
 
@@ -22,7 +23,9 @@ rather than relying on deprecated automatic location resolution)
 
 * `pip install git+https://github.com/helanabi/terminal-weather.git`
 
-> Temporarily: you need to manually create a configuration file with the content of `./conf`, until I implement an automated procedure to do that, e.g. copy the content of `./conf` to `~/.terminal-weather`.
+> Temporarily: you need to manually create a configuration file with
+the content of `./conf` (until an automated procedure is implemented),
+e.g. copy the content of `./conf` to `~/.terminal-weather`.
 
 ## Usage
 
@@ -46,11 +49,11 @@ options:
                         range of the form: [start],[end]
   -D, --debug           enable debugging messages
   -f, --fields FIELDS   specify a comma-separated list of fields to show
-                        (default: desc,temp), or 'all' to show all fields.
-                        Available fields are: desc, temp, feels_like,
-                        temp_min, temp_max, pressure, humidity, sea_level,
-                        grnd_level, visibility, wind_speed, wind_deg,
-                        wind_gust, rain, clouds, sunrise, sunset
+                        (default: city,desc,temp), or 'all' to show all
+                        fields. Available fields are: city, desc, temp,
+                        feels_like, temp_min, temp_max, pressure, humidity,
+                        sea_level, grnd_level, visibility, wind_speed,
+                        wind_deg, wind_gust, rain, clouds, sunrise, sunset
   -j, --json            show results in raw json format
   -k, --key KEY         OpenWeatherMap API key
   -u, --units {metric,imperial,standard}
@@ -65,18 +68,23 @@ options:
 ## Examples
 
 - `weather`  
-Print current weather for preconfigured location, otherwise attempt
+Print current weather for preconfigured location, otherwise attempt  
 to auto-detect it and prompt user to save it.
 
 - `weather today`  
 Show weather forecasts for today (this is an alias for `weather --days 0`).
 
-- `weather --fields visibility,wind_speed --location rabat,ma tomorrow`  
-Show forecasted visibility and wind speed in Rabat (Morocco) tomorrow.
+- `weather --days 1,3 --fields rain,clouds --location rabat,MA`  
+Show forecasted rain and clouds for three days starting tomorrow  
+in Rabat (Morocco).
 
-- `weather --days 1,3 -f rain,clouds --geocoordinates 33,-6`  
-Show forecasted rain and clouds for three days starting tomorrow
-in the location with geocoordinates: latitude=33 and longitude=-6.
+- `weather -f visibility,wind_speed --geocoordinates 33,-6 tomorrow`  
+Show forecasted visibility and wind speed tomorrow in the location with  
+geocoordinates: latitude=33 and longitude=-6.
+
+- `weather --units imperial -f temp -l berkeley forecast`  
+Show temperature for the next 5 days in Berkeley, using imperial units  
+(e.i. temperature in Fahrenheit).
 
 ## Configuration
 
@@ -135,3 +143,8 @@ in the configuration file.
 
 This project is licensed under the GNU General Public License v3.0 or later.  
 See the COPYING file for details.
+
+---
+
+[^1]: Notably, it uses geocoding API for city/geocoordinates translation
+rather than relying on **deprecated** automatic location resolution.

@@ -37,10 +37,11 @@ def parse_args():
     parser.add_argument("-f", "--fields",
                         help="specify a comma-separated list of fields to show"
                         f" (default: {config.DEFAULTS['fields']}), or 'all' to "
-                        "show all fields. Available fields are: desc, temp, "
-                        "feels_like, temp_min, temp_max, pressure, humidity, "
-                        "sea_level, grnd_level, visibility, wind_speed, "
-                        "wind_deg, wind_gust, rain, clouds, sunrise, sunset")
+                        "show all fields. Available fields are: city, desc, "
+                        "temp, feels_like, temp_min, temp_max, pressure, "
+                        "humidity, sea_level, grnd_level, visibility, "
+                        "wind_speed, wind_deg, wind_gust, rain, clouds, "
+                        "sunrise, sunset")
     parser.add_argument("-j", "--json", action="store_true",
                         help="show results in raw json format")
     parser.add_argument("-k", "--key", help="OpenWeatherMap API key")

@@ -144,7 +144,6 @@ in the configuration file.
 This project is licensed under the GNU General Public License v3.0 or later.  
 See the COPYING file for details.
 
----
 
 [^1]: Notably, it uses geocoding API for city/geocoordinates translation
 rather than relying on **deprecated** automatic location resolution.

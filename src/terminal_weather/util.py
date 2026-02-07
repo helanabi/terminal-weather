@@ -81,7 +81,7 @@ def error(msg, exit_code=2, prefix="Error: "):
 
 def count_ts(day, interval=owm.INTERVAL):
     """Return the number of timestamps until last hour of a given day."""
-    return math.ceil((23 - datetime.now().hour + day * 24) / interval)
+    return  math.ceil(((day + 1) * 24) / interval)
 
 def word_to_days(word, max_days=owm.MAX_DAYS):
     """Convert a word to a day range.

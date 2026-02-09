@@ -1,6 +1,6 @@
 ## Overview
 
-Get current weather and forecasts for upcoming days
+A CLI program for current weather and short-range forecasts.
 
 `todo: add demo GIF`
 
@@ -19,7 +19,7 @@ Get current weather and forecasts for upcoming days
 
 - Python 3.9 or newer
 
-> The project is written to be compatible with Python 3.9+.
+> The project is written to be compatible with Python 3.9+.  
 > It is primarily developed using newer Python versions, and
 > full cross-version testing may be added in the future.
 
@@ -27,9 +27,7 @@ Get current weather and forecasts for upcoming days
 
 * `pip install git+https://github.com/helanabi/terminal-weather.git`
 
-> Temporarily: you need to manually create a configuration file with
-the content of `./conf` (until an automated procedure is implemented),
-e.g. copy the content of `./conf` to `~/.terminal-weather`.
+> Note: Automated configuration generation is planned. For now, copy ./conf to ~/.terminal-weather.
 
 ## Usage
 

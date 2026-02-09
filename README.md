@@ -17,7 +17,11 @@ Get current weather and forecasts for upcoming days
 
 ## Requirements
 
-- Python 3.9+
+- Python 3.9 or newer
+
+> The project is written to be compatible with Python 3.9+.
+> It is primarily developed using newer Python versions, and
+> full cross-version testing may be added in the future.
 
 ## Installation
 

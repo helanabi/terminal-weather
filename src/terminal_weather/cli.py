@@ -11,7 +11,7 @@ from . import output
 from . import owm
 from . import util
 
-VERSION = "Terminal-weather version 0.1.0"
+VERSION = "Terminal-weather version 0.1.1"
 COPYRIGHT = """Copyright (C) 2026 Hassan El anabi
 Terminal-weather comes with ABSOLUTELY NO WARRANTY.
 You may redistribute copies of Terminal-weather

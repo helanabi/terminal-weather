@@ -19,6 +19,8 @@ def print_ts(weather_dict,
     """Extract and print specific fields from a weather dictionary."""
 
     padding = max(map(len, fields))
+    if time_shift is None:
+        time_shift = lookup(weather_dict, "timezone")
 
     print(field_delim.join(
         sep.join(
@@ -26,7 +28,7 @@ def print_ts(weather_dict,
                 field,
                 lookup(weather_dict, field),
                 tzinfo=timezone(timedelta(
-                    seconds=time_shift or lookup(weather_dict, "timezone")
+                    seconds=time_shift
                 )),
                 time_format=time_format,
                 units=units))

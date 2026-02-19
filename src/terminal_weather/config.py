@@ -10,7 +10,7 @@ from . import util
 CONF_FILE = None # automatically set by init_conf()
 CONF_SPEC = {
     "cumulative": ("geoip-url", "geoip-fields", "key"),
-    "singleton": (
+    "scalar": (
         "days",
         "location",
         "geocoordinates",

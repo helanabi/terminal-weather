@@ -2,7 +2,7 @@
 
 A CLI program for current weather and short-range forecasts.
 
-`todo: add demo GIF`
+![weather demo](demo.gif)
 
 ## Notable Features
 
